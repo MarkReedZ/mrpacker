@@ -55,6 +55,10 @@ objs = [
 None, True,False,float('inf'),
 [18446744073709551615, 18446744073709551615, 18446744073709551615],
 ]
+o = {}
+for x in range(900):
+  o[x] = x
+objs.append(o)
 
 # NaN != Nan so check str rep
 o = j.unpack( j.pack( float('nan') ) )

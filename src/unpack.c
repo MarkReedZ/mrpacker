@@ -23,6 +23,7 @@ static uint32_t sbuf_len;
 
 
 PyObject *decode( Decoder *d ) { //unsigned char *s, unsigned char *end) {
+  //printf( "fb: %lx\n", (int)*(d->s));
   if ( *(d->s) == 0x60 ) { d->s += 1; Py_INCREF(Py_None); return Py_None; }
   else if ( (*(d->s) & 0xE0) == 0x80 ) {  // String
     int l = *(d->s) & 0x1F; 
@@ -92,7 +93,21 @@ PyObject *decode( Decoder *d ) { //unsigned char *s, unsigned char *end) {
     for (Py_ssize_t i = 0; i < l; i++) {
       if (Py_EnterRecursiveCall(" while unpacking list object")) return 0;
       PyList_SetItem( ret, i, decode( d ) );
-      //PyObject_Print( ret, stdout, 0 );
+      Py_LeaveRecursiveCall();
+    }
+    d->depth -= 1;
+    return ret;
+  }
+  else if ( *(d->s) == 0x6A ) {  // List
+    d->s++;
+    uint32_t *p = (uint32_t*)d->s;
+    uint32_t l = *p;
+    d->s+=4;
+    d->depth += 1;
+    PyObject *ret = PyList_New(l);
+    for (Py_ssize_t i = 0; i < l; i++) {
+      if (Py_EnterRecursiveCall(" while unpacking list object")) return 0;
+      PyList_SetItem( ret, i, decode( d ) );
       Py_LeaveRecursiveCall();
     }
     d->depth -= 1;
@@ -111,7 +126,21 @@ PyObject *decode( Decoder *d ) { //unsigned char *s, unsigned char *end) {
     d->depth -= 1;
     return ret;
   }
-  else {
+  else if ( *(d->s) == 0x69 ) {  // Dict
+    d->s++;
+    uint32_t *p = (uint32_t*)d->s;
+    uint32_t l = *p;
+    d->s+=4;
+    d->depth += 1;
+    PyObject *ret = PyDict_New();
+    for (Py_ssize_t i = 0; i < l; i++) {
+      PyObject* k = decode(d);
+      PyObject* v = decode(d);
+      PyDict_SetItem( ret, k, v );
+    }
+    d->depth -= 1;
+    return ret;
+  } else {
     PyErr_Format(PyExc_ValueError, "Parser error");
     return NULL;
   }

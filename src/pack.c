@@ -92,24 +92,30 @@ int encode( PyObject *o, Encoder *e ) {
     //if (i == -1 && PyErr_Occurred()) return 0;
     if (overflow == 0) {
 
-      if ( i >= 0 && i < 32 ) {
-        *(e->s++) = 0xC0 | i;
-      } else if ( i < 0xFFFFFFFF ) {
-        *(e->s++) = 0x68;
-        uint32_t *p = (uint32_t*)(e->s);
-        *p = i;
-        e->s += 4;
-      } else if ( i < 0 && i > -0xFFFFFFFF ) {
-        *(e->s++) = 0x67;
-        uint32_t *p = (uint32_t*)(e->s);
-        *p = i;
-        e->s += 4;
-      } else { 
-        *(e->s++) = 0x64;
-        long long *p = (long long *)(e->s);
-        *p = i;
-        e->s += 8;
+      if ( i >= 0 ) {
+        if ( i < 32 ) {
+          *(e->s++) = 0xC0 | i;
+          return 1;
+        } else if ( i < 0xFFFFFFFF ) {
+          *(e->s++) = 0x68;
+          uint32_t *p = (uint32_t*)(e->s);
+          *p = i;
+          e->s += 4;
+          return 1;
+        } 
       }
+      else if ( i < 0 && i > -0xFFFFFFFF ) {
+        *(e->s++) = 0x67;
+        int *p = (int*)(e->s);
+        *p = i;
+        e->s += 4;
+        return 1;
+      } 
+ 
+      *(e->s++) = 0x64;
+      long long *p = (long long *)(e->s);
+      *p = i;
+      e->s += 8;
 
     } else {
       *(e->s++) = 0x65;

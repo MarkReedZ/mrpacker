@@ -7,8 +7,12 @@ def pbuf( b ):
   print(s)
 
 import mrpacker
-o = { "name":"mrpacker", "awesome?":"yes" }
+o = {}
+for x in range(35):
+  o[x] = 1
 b = mrpacker.pack( o )
+print(b)
+pbuf(b)
 print( mrpacker.unpack(b) )
 
 #print(b)
