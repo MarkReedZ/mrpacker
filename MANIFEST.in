@@ -1,0 +1,3 @@
+recursive-include src *.c *.h
+include *.txt
+include README.md
