@@ -1,19 +1,20 @@
-import msgpack
 
+# To create a binary string in lua for using wrk to test mrpacker and mrhttp
 def pbuf( b ):
   s = "string.char("
   for c in b:
     s += hex(c) + ", "
   print(s)
+
 import mrpacker
-o = { "name":"MalthusianProphet", "tl":2004, "dankmemes":True, "list":[1,2,3,4,5,6] }
-#print(len(o))
-b = msgpack.packb( o )
-print(b)
-f = open("test.mrp","wb")
-f.write(b)
-f.close()
-pbuf(b)
-#print(len(b))
+o = { "name":"mrpacker", "awesome?":"yes" }
+b = mrpacker.pack( o )
 print( mrpacker.unpack(b) )
+
+#print(b)
+#f = open("test.mrp","wb")
+#f.write(b)
+#f.close()
+#pbuf(b)
+#print(len(b))
 
