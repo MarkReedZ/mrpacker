@@ -1,42 +1,24 @@
-import timeit, mrpacker, msgpack, mrjson
+import timeit, mrpacker, mrjson
 
-setup = u'''
-import mrpacker,msgpack,mrjson, zstd
-o = {'tl': [206187574518812,"dsdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"], 'd': {206187574518812: {'p': 0, 'txt': 'Masses elements hitch from parenthesis from. Decorations agree banks congress one four aptitudes. Owners pay.', 'c': 206187574518812, 'cs': [], 'au': '1287', 'up': 1, 'dn': 0, 'rtg': 1, 'ago': '1 hour ago', 'num': 0, 'tp': 206187574518812}}}
-#o = { "name":"MalthusianProphet", "tl":2004, "dankmemes":True, "list":[1,2,3,4,5,6] }
+setup = """
+import mrpacker,mrjson
+o = {'tl': [3376686588804032, 3467362509744518, 3467383293555110, 3467470637563061, 3467478106854362, 3467478107397231, 3467500195766276, 3535631493306510], 'd': {3376686588804032: {'p': 0, 'txt': 'test', 'c': 3376686588804032, 'cs': [3376907122926878, 3467281916293896], 'au': 'Mark', 'rtg': 1, 'ts': 1537224158, 'num': 3, 'tp': 3376686588804032}, 3376907122926878: {'p': 3376686588804032, 'txt': 'Well now\\n', 'c': 3376907122926878, 'cs': [3467275147554700], 'au': 'Mark', 'rtg': 1, 'ts': 1537224368, 'tp': 3376686588804032}, 3467275147554700: {'p': 3376907122926878, 'txt': '<p>new comment</p>\\n', 'c': 3467275147554700, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537310550, 'tp': 3376686588804032}, 3467281916293896: {'p': 3376686588804032, 'txt': '<p>another comment</p>\\n', 'c': 3467281916293896, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537310556, 'tp': 3376686588804032}, 3467362509744518: {'p': 0, 'txt': '<p>ttest</p>\\n', 'c': 3467362509744518, 'cs': [3467383293367650], 'au': 'Mark', 'rtg': 1, 'ts': 1537310633, 'num': 1, 'tp': 3467362509744518}, 3467383293555110: {'p': 0, 'txt': '<p>ttesttestst</p>\\n', 'c': 3467383293555110, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537310653, 'num': 0, 'tp': 3467383293555110}, 3467383293367650: {'p': 3467362509744518, 'txt': '<p>tadfas</p>\\n', 'c': 3467383293367650, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537310653, 'tp': 3467362509744518}, 3467470637563061: {'p': 0, 'txt': '<p>zz</p>\\n', 'c': 3467470637563061, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537310736, 'num': 0, 'tp': 3467470637563061}, 3467478106854362: {'p': 0, 'txt': '<p>zzfdsfdsa</p>\\n', 'c': 3467478106854362, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537310743, 'num': 0, 'tp': 3467478106854362}, 3467478107397231: {'p': 0, 'txt': '<p>2</p>\\n', 'c': 3467478107397231, 'cs': [3467500195452975], 'au': 'Mark', 'rtg': 1, 'ts': 1537310743, 'num': 1, 'tp': 3467478107397231}, 3467500195766276: {'p': 0, 'txt': '<p>3</p>\\n', 'c': 3467500195766276, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537310764, 'num': 0, 'tp': 3467500195766276}, 3467500195452975: {'p': 3467478107397231, 'txt': '<p>tat</p>\\n', 'c': 3467500195452975, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537310764, 'tp': 3467478107397231}, 3535631493306510: {'p': 0, 'txt': '<p>New comment</p>\\n', 'c': 3535631493306510, 'cs': [], 'au': 'Mark', 'rtg': 1, 'ts': 1537375739, 'num': 0, 'tp': 3535631493306510}}}
 
-bm = msgpack.packb(o)
 bp = mrpacker.pack(o)
 bj = mrjson.dumps(o)
-'''
+"""
 
-o = {'tl': [206187574518812], 'd': {206187574518812: {'p': 0, 'txt': 'Masses elements hitch from parenthesis from. Decorations agree banks congress one four aptitudes. Owners pay.', 'c': 206187574518812, 'cs': [], 'au': '1287', 'up': 1, 'dn': 0, 'rtg': 1, 'ago': '1 hour ago', 'num': 0, 'tp': 206187574518812}}}
-o = {'tl': [206187574518812,"dsdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"], 'd': {206187574518812: {'p': 0, 'txt': 'Masses elements hitch from parenthesis from. Decorations agree banks congress one four aptitudes. Owners pay.', 'c': 206187574518812, 'cs': [], 'au': '1287', 'up': 1, 'dn': 0, 'rtg': 1, 'ago': '1 hour ago', 'num': 0, 'tp': 206187574518812}}}
-#o = { "name":"MalthusianProphet", "tl":2004, "dankmemes":True, "list":[1,2,3,4,5,6] }
+from statistics import mean,stdev
 
+pck = timeit.Timer('mrpacker.pack(o)',   setup=setup).repeat(10000, 1)
+un  = timeit.Timer('mrpacker.unpack(bp)',setup=setup).repeat(10000, 1)
+jdump = timeit.Timer('mrjson.dumps(o)',setup=setup).repeat(10000, 1)
+jload = timeit.Timer('mrjson.loads(bj)',setup=setup).repeat(10000, 1)
+  
+print( "mrpacker:" )
+print( mean(pck),stdev(pck) )
+print( mean(un),stdev(un) )
+print( "mrjson:" )
+print( mean(jdump),stdev(jdump) )
+print( mean(jload),stdev(jload) )
 
-print ("  ",(min(timeit.Timer('mrpacker.pack(o)',setup=setup).repeat(100, 1))))
-print ("  ",(min(timeit.Timer('mrpacker.unpack(bp)',setup=setup).repeat(100, 1))))
-print ("  ",(min(timeit.Timer('msgpack.packb(o)',setup=setup).repeat(100, 1))))
-print ("  ",(min(timeit.Timer('msgpack.unpackb(bm, encoding = "utf-8")',setup=setup).repeat(100, 1))))
-print ("  ",(min(timeit.Timer('mrjson.dumps(o)',setup=setup).repeat(100, 1))))
-print ("  ",(min(timeit.Timer('mrjson.loads(bj)',setup=setup).repeat(100, 1))))
-
-if o != mrpacker.unpack( mrpacker.pack(o) ):
-  print("not equal")
-
-print (len( mrpacker.pack(o) ))
-print (len( msgpack.packb(o) ))
-print (len( mrjson.dumps(o) ))
-
-import zstd
-print (len( zstd.compress(mrpacker.pack(o)) ))
-print (len( zstd.compress(msgpack.packb(o)) ))
-print (len( zstd.compress(mrjson.dumpb(o)) ))
-print ("  ",(min(timeit.Timer('zstd.compress(mrpacker.pack(o))',setup=setup).repeat(100, 1))))
-print ("  ",(min(timeit.Timer('zstd.compress(msgpack.packb(o))',setup=setup).repeat(100, 1))))
-print ("  ",(min(timeit.Timer('zstd.compress(mrjson.dumpb(o))',setup=setup).repeat(100, 1))))
-
-
-o = { "list":["199999988888888888888888999999999999999999999999999999999999999999",1,2,3], "a":1,"b":2 }
-o = { "list":9, "a":1,"b":2 }

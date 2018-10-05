@@ -1,6 +1,7 @@
 # coding=UTF-8
 
 import mrpacker as j
+import json
 import inspect
 
 def raises( o, f, exc,details ):
@@ -21,6 +22,9 @@ def eq( a, b ):
     print( "ERROR Line", cf.f_back.f_lineno, a, "!=", b )
     return -1
   return 0
+
+
+
 
 
 print("Running tests...")
@@ -54,9 +58,10 @@ objs = [
 ["别","停","believing", -1,True,"zero",False, 1.0],
 None, True,False,float('inf'),
 [18446744073709551615, 18446744073709551615, 18446744073709551615],
+{ "A":[{},[],{}], "b": { "1":1,"2":2,"3":3 } },
 ]
 o = {}
-for x in range(900):
+for x in range(1000):
   o[x] = x
 objs.append(o)
 
@@ -71,6 +76,15 @@ for o in objs:
   except Exception as e:
     print( "ERROR",str(e), o )
 
+from os import walk
+for (dirpath, dirnames, filenames) in walk("test_data"):
+  for fn in filenames:
+    f = open( "test_data/"+fn,"rb")
+    o = json.load(f)
+    try:
+      eq( o, j.unpack(j.pack(o)) )
+    except Exception as e:
+      print( "ERROR",str(e), o )
 
 # TODO
 #print("Testing Exceptions..")

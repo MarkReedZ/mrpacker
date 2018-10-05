@@ -1,149 +1,234 @@
+
+
 #include "unpack.h"
 #include "py_defines.h"
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct _decoder
+#define DBG if(0) 
+
+#define MAX_DEPTH 64
+
+static char errmsg[256];
+static PyObject* SetErrorInt(const char *message, int pos)
 {
-  unsigned char *start, *end, *s;
-  int depth;
-} Decoder;
+  char pstr[32];
+  sprintf( pstr, "%d", pos );
+  strcpy( errmsg, message );
+  strcat( errmsg, pstr );
+  PyErr_Format (PyExc_ValueError, "%s", errmsg);
+  return NULL;
+}
 
 
-static char    *sbuf;
-static uint32_t sbuf_len;
+PyObject *decode( unsigned char *s, unsigned char *end) {
+  PyObject *parents[MAX_DEPTH];
+  PyObject *keys[MAX_DEPTH];
+  int curlen[MAX_DEPTH];
+  int maxlen[MAX_DEPTH];
+  int types[MAX_DEPTH];
+  
+  int depth = -1;
+  PyObject *o;
 
-//static void print_buffer( unsigned char* b, int len ) {
-  //for ( int z = 0; z < len; z++ ) {
-    //printf( "%02x ",(int)b[z]);
-  //}
-  //printf("\n");
-//}
 
+  while( s < end ) {
+  if ( *s == 0x60 ) { s += 1; Py_INCREF(Py_None); o = Py_None; }
+  else if ( (*(s) & 0xE0) == 0x80 ) {  // String
+    int l = *(s) & 0x1F; 
+    s += 1;
+    // This is deprecated.  We can't do this trick unless we have separate code points
+    //   for 1 / 2 / 4 byte unicode strings
+    o = PyUnicode_FromStringAndSize( s, l );
+    //o = PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, s, l);
 
-PyObject *decode( Decoder *d ) { //unsigned char *s, unsigned char *end) {
-  //printf( "fb: %lx\n", (int)*(d->s));
-  if ( *(d->s) == 0x60 ) { d->s += 1; Py_INCREF(Py_None); return Py_None; }
-  else if ( (*(d->s) & 0xE0) == 0x80 ) {  // String
-    int l = *(d->s) & 0x1F; 
-    d->s += 1;
-    memcpy( sbuf, d->s, l );
-    d->s += l;
-    return PyUnicode_FromStringAndSize( sbuf, l );
+    //memcpy( sbuf, s, l );
+    s += l;
+    //return o;
+/*
+    //memcpy( sbuf, s, l );
+    //printf("l is %d\n",l);
+    //PyObject *result = PyUnicode_FromUnicode(NULL, l);
+    PyObject *result = PyUnicode_New(l,127);
+    if (! result) { printf("!res\n"); return NULL; }
+    //Py_UNICODE *r = PyUnicode_AS_UNICODE(result);
+    char *r = PyUnicode_1BYTE_DATA(result);
+    memcpy(r, s, l);
+    s += l;
+    return result;
+    //return PyUnicode_FromStringAndSize( sbuf, l );
+    //PyUnicode_READY(result);
+    //printf("str: >%.*s<\n", l, s );
+    //printf("str: >%.*s<\n", l, r );
+    //PyObject_Print(result, stdout, 0); printf("\n");
+*/
   }
-  else if ( *(d->s) == 0x66 ) { 
-    d->s++;
-    uint32_t *p = (uint32_t*)d->s;
+  else if ( *(s) == 0x66 ) { 
+    s++;
+    uint32_t *p = (uint32_t*)s;
     uint32_t l = *p;
-    d->s+=4;
+    s+=4;
+    //o = PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, s, l);
+    o = PyUnicode_FromStringAndSize( s, l );
+    s += l;
+    //return o;
+/*
     if ( l > sbuf_len ) { 
       while ( l > sbuf_len ) { sbuf_len <<= 1; } 
       sbuf = (char*)realloc(sbuf, sbuf_len);
     }
-    memcpy( sbuf, d->s, l );
-    d->s += l;
+    memcpy( sbuf, s, l );
+    s += l;
     return PyUnicode_FromStringAndSize( sbuf, l );
+    PyObject *result = PyUnicode_New(l,127);
+    if (! result) { printf("!res\n"); return NULL; }
+    char *r = PyUnicode_1BYTE_DATA(result);
+    memcpy(r, s, l);
+    s += l;
+    return result;
+*/
   }
-  else if ( *(d->s) == 0x61 ) { d->s += 1; Py_INCREF(Py_True); return Py_True; }
-  else if ( *(d->s) == 0x62 ) { d->s += 1; Py_INCREF(Py_False); return Py_False; }
-  else if ( *(d->s) == 0x63 ) { 
-    d->s++;
+  else if ( *(s) == 0x61 ) { s += 1; Py_INCREF(Py_True);  o = Py_True; }
+  else if ( *(s) == 0x62 ) { s += 1; Py_INCREF(Py_False); o = Py_False; }
+  else if ( *(s) == 0x63 ) { 
+    s++;
     union { double d; uint64_t i; } mem;
-    uint64_t *p = (uint64_t*)d->s;
+    uint64_t *p = (uint64_t*)s;
     mem.i = *p;
-    d->s += 8;
-    return PyFloat_FromDouble(mem.d);
+    s += 8;
+    o = PyFloat_FromDouble(mem.d);
   }
-  else if ( *(d->s) == 0x64 ) { 
-    d->s++;
-    long long *p = (long long*)d->s;
-    d->s += 8;
-    return PyLong_FromLong(*p);
+  else if ( *(s) == 0x64 ) { 
+    s++;
+    long long *p = (long long*)s;
+    s += 8;
+    o = PyLong_FromLong(*p);
   }
-  else if ( *(d->s) == 0x65 ) { 
-    d->s++;
-    uint64_t *p = (uint64_t*)d->s;
-    d->s += 8;
-    return PyLong_FromUnsignedLong(*p);
+  else if ( *(s) == 0x65 ) { 
+    s++;
+    uint64_t *p = (uint64_t*)s;
+    s += 8;
+    o = PyLong_FromUnsignedLong(*p);
   }
-  else if ( *(d->s) == 0x68 ) { 
-    d->s++;
-    uint32_t *p = (uint32_t*)d->s;
-    d->s += 4;
-    return PyLong_FromUnsignedLong(*p);
+  else if ( *(s) == 0x68 ) { 
+    s++;
+    uint32_t *p = (uint32_t*)s;
+    s += 4;
+    o = PyLong_FromUnsignedLong(*p);
   }
-  else if ( *(d->s) == 0x67 ) { 
-    d->s++;
-    int32_t *p = (int32_t*)d->s;
-    d->s += 4;
-    return PyLong_FromLong(*p);
+  else if ( *(s) == 0x67 ) { 
+    s++;
+    int32_t *p = (int32_t*)s;
+    s += 4;
+    o = PyLong_FromLong(*p);
   }
-  else if ( (*(d->s) & 0xE0) == 0xC0 ) {  // tiny int
-    int i = *(d->s) & 0x1F; 
-    d->s += 1;
-    return PyLong_FromLong(i);
+  else if ( (*(s) & 0xE0) == 0xC0 ) {  // tiny int
+    int i = *(s) & 0x1F; 
+    s += 1;
+    o = PyLong_FromLong(i);
   }
-  else if ( (*(d->s) & 0xE0) == 0x40 ) {  // List
-    int l = *(d->s) & 0x1F; 
-    d->s += 1;
-    d->depth += 1;
-    PyObject *ret = PyList_New(l);
-    //printf("new list of len %d", l);
-    for (Py_ssize_t i = 0; i < l; i++) {
-      if (Py_EnterRecursiveCall(" while unpacking list object")) return 0;
-      PyList_SetItem( ret, i, decode( d ) );
-      Py_LeaveRecursiveCall();
+  else if ( (*(s) & 0xE0) == 0x40 ) {  // List
+    int l = *(s) & 0x1F; 
+    s += 1;
+    if ( l == 0 ) o = PyList_New(0);
+    else {
+      depth += 1;
+      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);
+      DBG printf("depth %d is list\n",depth);
+      parents[depth] = PyList_New(l);
+      curlen[depth] = 0;
+      maxlen[depth] = l;
+      types[depth] = 1;
+      continue;
     }
-    d->depth -= 1;
-    return ret;
   }
-  else if ( *(d->s) == 0x6A ) {  // List
-    d->s++;
-    uint32_t *p = (uint32_t*)d->s;
+  else if ( *(s) == 0x6A ) {  // List
+    s++;
+    uint32_t *p = (uint32_t*)s;
     uint32_t l = *p;
-    d->s+=4;
-    d->depth += 1;
-    PyObject *ret = PyList_New(l);
-    for (Py_ssize_t i = 0; i < l; i++) {
-      if (Py_EnterRecursiveCall(" while unpacking list object")) return 0;
-      PyList_SetItem( ret, i, decode( d ) );
-      Py_LeaveRecursiveCall();
-    }
-    d->depth -= 1;
-    return ret;
+    s+=4;
+    depth += 1;
+    if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);
+    DBG printf("depth %d is list\n",depth);
+    parents[depth] = PyList_New(l);
+    curlen[depth] = 0;
+    maxlen[depth] = l;
+    types[depth] = 1;
+    continue;
   }
-  else if ( (*(d->s) & 0xE0) == 0x20 ) {  // dict
-    int l = *(d->s) & 0x1F; 
-    d->s += 1;
-    d->depth += 1;
-    PyObject *ret = PyDict_New();
-    for (Py_ssize_t i = 0; i < l; i++) {
-      PyObject* k = decode(d);
-      PyObject* v = decode(d);
-      PyDict_SetItem( ret, k, v );
+  else if ( (*(s) & 0xE0) == 0x20 ) {  // dict
+    int l = *(s) & 0x1F; 
+    //printf("new dict of len %d\n", l);
+    s += 1;
+    if ( l > 0 ) {
+      depth += 1;
+      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);
+      DBG printf("depth %d is dict\n",depth);
+      parents[depth] = PyDict_New();
+      curlen[depth] = 0;
+      maxlen[depth] = l;
+      types[depth] = 2;
+      keys[depth] = NULL;
+      continue;
+    } else {
+      o = PyDict_New();
     }
-    d->depth -= 1;
-    return ret;
   }
-  else if ( *(d->s) == 0x69 ) {  // Dict
-    d->s++;
-    uint32_t *p = (uint32_t*)d->s;
+  else if ( *(s) == 0x69 ) {  // Dict
+    s++;
+    uint32_t *p = (uint32_t*)s;
     uint32_t l = *p;
-    d->s+=4;
-    d->depth += 1;
-    PyObject *ret = PyDict_New();
-    for (Py_ssize_t i = 0; i < l; i++) {
-      PyObject* k = decode(d);
-      PyObject* v = decode(d);
-      PyDict_SetItem( ret, k, v );
+    s+=4;
+    //printf("new dict of len %d\n", l);
+    if ( l > 0 ) {
+      depth += 1;
+      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);
+      DBG printf("depth %d is dict\n",depth);
+      parents[depth] = PyDict_New();
+      curlen[depth] = 0;
+      maxlen[depth] = l;
+      types[depth] = 2;
+      keys[depth] = NULL;
+      continue;
+    } else {
+      o = PyDict_New();
     }
-    d->depth -= 1;
-    return ret;
   } else {
     PyErr_Format(PyExc_ValueError, "Parser error");
     return NULL;
   }
+  //PyObject_Print(o, stdout, 0); printf("\n");
+
+end:
+  if ( depth == -1 ) return o;
+  if ( types[depth] == 1 ) {
+    PyList_SetItem( parents[depth],curlen[depth],o );
+    curlen[depth] += 1;
+    if ( curlen[depth] == maxlen[depth] ) {
+      o = parents[depth];
+      depth -= 1;
+      goto end;
+    }
+  } else {
+    if ( keys[depth] == NULL ) {
+      keys[depth] = o;
+    } else {
+      //printf("depth %d\n",depth);
+      //printf("Key: "); PyObject_Print( keys[depth], stdout, 0 ); printf("\n");
+      //printf("Obj: "); PyObject_Print( o, stdout, 0 ); printf("\n");
+      PyDict_SetItem( parents[depth], keys[depth], o );
+      keys[depth] = NULL;
+      curlen[depth] += 1;
+      if ( curlen[depth] == maxlen[depth] ) {
+        o = parents[depth];
+        depth -= 1;
+        goto end;
+      }
+    }
+  } 
+  } 
+  return NULL;
 }
 
 PyObject* unpack(PyObject* self, PyObject *args, PyObject *kwargs)
@@ -159,9 +244,6 @@ PyObject* unpack(PyObject* self, PyObject *args, PyObject *kwargs)
     return NULL;
   }
 
-  sbuf_len = 256;
-  sbuf = (char*)malloc(sbuf_len);
-
   unsigned char* p;
   Py_ssize_t l;
 
@@ -170,22 +252,7 @@ PyObject* unpack(PyObject* self, PyObject *args, PyObject *kwargs)
     return NULL;
   }
 
-  //print_buffer( p, l );
+  return decode( p, p+l );
 
-  Decoder d = { p,p+l,p,0 };
-
-  return decode( &d );
-
-/*
-  char *endptr;
-  //ret = jsonParse(PyString_AS_STRING(sarg), &endptr, PyString_GET_SIZE(sarg));
-
-  if (sarg != arg)
-  {
-    Py_DECREF(sarg);
-  }
-
-  return ret;
-*/
 }
 
