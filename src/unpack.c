@@ -29,7 +29,7 @@ static PyObject* SetErrorInt(const char *message, int pos)
 }
 
 
-PyObject *decode( unsigned char *s, unsigned char *end) {
+PyObject *decode( char *s, char *end) {
   PyObject *parents[MAX_DEPTH];
   PyObject *keys[MAX_DEPTH];
   int curlen[MAX_DEPTH];
@@ -209,7 +209,7 @@ PyObject* unpack(PyObject* self, PyObject *args, PyObject *kwargs)
     return NULL;
   }
 
-  unsigned char* p;
+  char *p;
   Py_ssize_t l;
 
   if(PyBytes_AsStringAndSize(arg, &p, &l) == -1) {

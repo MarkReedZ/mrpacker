@@ -4,12 +4,8 @@
 
 typedef struct _encoder
 {
-  unsigned char *start, *end, *s;
+  char *start, *end, *s;
   int depth;  
-  int indent;
-  int skipKeys;
-  int ensure_ascii;
-  int sortKeys;
 } Encoder;
 
 //static void print_buffer( char* b, int len ) {
@@ -32,7 +28,7 @@ static int resizeBuffer(Encoder *e, size_t len)
 
   while (newSize < curSize + len) newSize *= 2;
 
-  e->start = (unsigned char *) realloc (e->start, newSize);
+  e->start = (char *) realloc (e->start, newSize);
   if (e->start == NULL)
   {
     SetError ("Could not reserve memory block");
@@ -58,6 +54,7 @@ static inline void reverse(char* begin, char* end)
   }
 }
 
+// First 3 bits:  000 not used, 001 map, 010 array, 011 various, 100 string, 110 tiny int
 // 0x60 null
 // 0x61 true
 // 0x62 false
@@ -70,7 +67,6 @@ static inline void reverse(char* begin, char* end)
 // 0x69 dict 32 bit length
 // 0x6A list 32 bit length
 
-// First 3 bits:  000 not used, 001 map, 010 array, 011 various, 100 string, 110 tiny int
 
 int encode( PyObject *o, Encoder *e ) {
   resizeBufferIfNeeded(e,2048);
@@ -79,12 +75,11 @@ int encode( PyObject *o, Encoder *e ) {
   if ( o == Py_None ) {
     *(e->s++) = 0x60;
   }
-  else if ( PyBool_Check(o) ) {
-    if ( o == Py_True ) {
-      *(e->s++) = 0x61;
-    } else {
-      *(e->s++) = 0x62;
-    }
+  else if ( o == Py_True ) {
+    *(e->s++) = 0x61;
+  }
+  else if ( o == Py_False ) {
+    *(e->s++) = 0x62;
   }
   else if ( PyLong_Check(o) ) {
     int overflow;
@@ -270,7 +265,7 @@ int encode( PyObject *o, Encoder *e ) {
 
 int do_encode(PyObject *o, Encoder *enc ) {
   int len = 65536;
-  unsigned char *s = (unsigned char *) malloc (len);
+  char *s = (char *) malloc (len);
   if (!s) {
     SetError("Could not reserve memory block");
     return 0;
@@ -285,35 +280,17 @@ int do_encode(PyObject *o, Encoder *enc ) {
 
 
 PyObject* pack(PyObject* self, PyObject *args, PyObject *kwargs) {
-  static char *kwlist[] = { "obj", "ensure_ascii", "sort_keys", "indent", "skipkeys", "output_bytes", NULL };
+  static char *kwlist[] = { "obj", NULL };
 
-  PyObject *oinput = NULL;
-  PyObject *oensureAscii = NULL;
-  //PyObject *oencodeHTMLChars = NULL;
-  //PyObject *oescapeForwardSlashes = NULL;
-  PyObject *osortKeys = NULL;
-  PyObject* oindent = NULL;
-  PyObject* oskipkeys = NULL;
-  PyObject* obytes = NULL;
+  PyObject *o = NULL;
 
-  Encoder enc = { NULL,NULL,NULL,0,0,0,0,0 };
+  Encoder enc = { NULL,NULL,NULL,0 };
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OOOOO", kwlist, &oinput, &oensureAscii, &osortKeys, &oindent, &oskipkeys, &obytes)) return NULL;
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|O", kwlist, &o )) return NULL;
 
-  if (oensureAscii != NULL && !PyObject_IsTrue(oensureAscii)) enc.ensure_ascii = 0;
-  if (osortKeys != NULL && PyObject_IsTrue(osortKeys)) enc.sortKeys = 1;
-  if (oskipkeys != NULL && PyObject_IsTrue(oskipkeys)) enc.skipKeys = 1;
-  if (oindent == NULL ) {
-    enc.indent = -1;
-  } else {
-    enc.indent = PyLong_AsLong(oindent);
-  }
-
-  int r = do_encode( oinput, &enc );
+  int r = do_encode( o, &enc );
  
   if ( r != 0 ) {
-    //printf(" len %d\n", enc.s - enc.start );
-    //print_buffer( enc.start , enc.s - enc.start );
     PyObject *ret = PyBytes_FromStringAndSize(enc.start, enc.s-enc.start);
     free(enc.start);
     return ret;
