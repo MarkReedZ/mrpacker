@@ -1,4 +1,3 @@
 
 While encoding if the string is ascii using a different code point would allow the javascript unpacker to just copy the mem
 Negative numbers
-

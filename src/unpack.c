@@ -1,5 +1,4 @@
 
-
 #include "unpack.h"
 #include "py_defines.h"
 #include <time.h>
@@ -9,6 +8,14 @@
 #define DBG if(0) 
 
 #define MAX_DEPTH 64
+
+static __inline__ unsigned long long rdtsc(void)
+{ 
+  unsigned long lo, hi;
+  __asm__ volatile( "rdtsc" : "=a" (lo), "=d" (hi) );
+  return( lo | ( hi << 32 ) );
+}
+
 
 static char errmsg[256];
 static PyObject* SetErrorInt(const char *message, int pos)
@@ -38,56 +45,16 @@ PyObject *decode( unsigned char *s, unsigned char *end) {
   else if ( (*(s) & 0xE0) == 0x80 ) {  // String
     int l = *(s) & 0x1F; 
     s += 1;
-    // This is deprecated.  We can't do this trick unless we have separate code points
-    //   for 1 / 2 / 4 byte unicode strings
     o = PyUnicode_FromStringAndSize( s, l );
-    //o = PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, s, l);
-
-    //memcpy( sbuf, s, l );
     s += l;
-    //return o;
-/*
-    //memcpy( sbuf, s, l );
-    //printf("l is %d\n",l);
-    //PyObject *result = PyUnicode_FromUnicode(NULL, l);
-    PyObject *result = PyUnicode_New(l,127);
-    if (! result) { printf("!res\n"); return NULL; }
-    //Py_UNICODE *r = PyUnicode_AS_UNICODE(result);
-    char *r = PyUnicode_1BYTE_DATA(result);
-    memcpy(r, s, l);
-    s += l;
-    return result;
-    //return PyUnicode_FromStringAndSize( sbuf, l );
-    //PyUnicode_READY(result);
-    //printf("str: >%.*s<\n", l, s );
-    //printf("str: >%.*s<\n", l, r );
-    //PyObject_Print(result, stdout, 0); printf("\n");
-*/
   }
   else if ( *(s) == 0x66 ) { 
     s++;
     uint32_t *p = (uint32_t*)s;
     uint32_t l = *p;
     s+=4;
-    //o = PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, s, l);
     o = PyUnicode_FromStringAndSize( s, l );
     s += l;
-    //return o;
-/*
-    if ( l > sbuf_len ) { 
-      while ( l > sbuf_len ) { sbuf_len <<= 1; } 
-      sbuf = (char*)realloc(sbuf, sbuf_len);
-    }
-    memcpy( sbuf, s, l );
-    s += l;
-    return PyUnicode_FromStringAndSize( sbuf, l );
-    PyObject *result = PyUnicode_New(l,127);
-    if (! result) { printf("!res\n"); return NULL; }
-    char *r = PyUnicode_1BYTE_DATA(result);
-    memcpy(r, s, l);
-    s += l;
-    return result;
-*/
   }
   else if ( *(s) == 0x61 ) { s += 1; Py_INCREF(Py_True);  o = Py_True; }
   else if ( *(s) == 0x62 ) { s += 1; Py_INCREF(Py_False); o = Py_False; }
@@ -214,10 +181,8 @@ end:
     if ( keys[depth] == NULL ) {
       keys[depth] = o;
     } else {
-      //printf("depth %d\n",depth);
-      //printf("Key: "); PyObject_Print( keys[depth], stdout, 0 ); printf("\n");
-      //printf("Obj: "); PyObject_Print( o, stdout, 0 ); printf("\n");
       PyDict_SetItem( parents[depth], keys[depth], o );
+      Py_DECREF(keys[depth]); Py_DECREF(o);
       keys[depth] = NULL;
       curlen[depth] += 1;
       if ( curlen[depth] == maxlen[depth] ) {
@@ -252,6 +217,10 @@ PyObject* unpack(PyObject* self, PyObject *args, PyObject *kwargs)
     return NULL;
   }
 
+  //unsigned long long cycles = rdtsc();
+  //PyObject *ret = decode( p, p+l );
+  //printf(" took %lld\n", rdtsc() - cycles);
+  //return ret;
   return decode( p, p+l );
 
 }
