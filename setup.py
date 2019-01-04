@@ -4,13 +4,19 @@ except ImportError:
   from distutils.core import setup, Extension
 import os.path
 import re
-import sys, codecs
+import sys, codecs, platform
 
 with codecs.open('README.md', encoding='utf-8') as f:
     README = f.read()
 
 with codecs.open('version.txt', encoding='utf-8') as f:
     VERSION = f.read().strip()
+
+link_args = ['-lstdc++', '-lm']
+compile_args = ['-D_GNU_SOURCE','-O3']
+if platform.system() == 'Windows':
+  compile_args = ['-D_GNU_SOURCE']
+  link_args = []
 
 module1 = Extension(
     'mrpacker',
@@ -20,9 +26,10 @@ module1 = Extension(
          './src/unpack.c'
      ],
      include_dirs = ['./src'],
-     extra_compile_args = ['-D_GNU_SOURCE','-O3'],
-     extra_link_args = ['-lstdc++', '-lm'],
-     define_macros = [('MRPACKER_VERSION', VERSION)]
+     extra_compile_args = compile_args,
+     extra_link_args = link_args,
+     define_macros = [('MRPACKER_VERSION', VERSION),
+                      ('_CRT_SECURE_NO_WARNINGS', 1)]
 )
 
 setup(

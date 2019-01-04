@@ -89,20 +89,20 @@ int encode( PyObject *o, Encoder *e ) {
 
       if ( i >= 0 ) {
         if ( i < 32 ) {
-          *(e->s++) = 0xC0 | i;
+          *(e->s++) = 0xC0 | (unsigned char)i;
           return 1;
         } else if ( i < 0xFFFFFFFF ) {
           *(e->s++) = 0x68;
           uint32_t *p = (uint32_t*)(e->s);
-          *p = i;
+          *p = (uint32_t)i;
           e->s += 4;
           return 1;
         } 
       }
-      else if ( i < 0 && i > -0xFFFFFFFF ) {
+      else if ( i < 0 && i > -0xFFFFFFFFLL ) {
         *(e->s++) = 0x67;
         int *p = (int*)(e->s);
-        *p = i;
+        *p = (int)i;
         e->s += 4;
         return 1;
       } 

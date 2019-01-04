@@ -9,6 +9,34 @@
 
 #define MAX_DEPTH 64
 
+#ifdef _MSC_VER
+
+#ifdef _M_IX86
+
+inline uint64_t rdtsc()
+{
+  uint64_t c;
+  __asm {
+    cpuid       // serialize processor
+    rdtsc       // read time stamp counter
+    mov dword ptr [c + 0], eax
+    mov dword ptr [c + 4], edx
+  }
+  return c;
+}
+
+#elif defined(_M_X64)
+
+extern "C" unsigned __int64 __rdtsc();
+#pragma intrinsic(__rdtsc)
+inline uint64_t rdtsc()
+{
+  return __rdtsc();
+}
+
+#endif
+
+#else
 static __inline__ unsigned long long rdtsc(void)
 { 
   unsigned long lo, hi;
@@ -16,6 +44,7 @@ static __inline__ unsigned long long rdtsc(void)
   return( lo | ( hi << 32 ) );
 }
 
+#endif
 
 static char errmsg[256];
 static PyObject* SetErrorInt(const char *message, int pos)
@@ -70,13 +99,13 @@ PyObject *decode( char *s, char *end) {
     s++;
     long long *p = (long long*)s;
     s += 8;
-    o = PyLong_FromLong(*p);
+    o = PyLong_FromLongLong(*p);
   }
   else if ( *(s) == 0x65 ) { 
     s++;
     uint64_t *p = (uint64_t*)s;
     s += 8;
-    o = PyLong_FromUnsignedLong(*p);
+    o = PyLong_FromUnsignedLongLong(*p);
   }
   else if ( *(s) == 0x68 ) { 
     s++;
