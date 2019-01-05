@@ -15,6 +15,9 @@ env:
   global:
     - TWINE_USERNAME=MarkReedZ
     - PIP=pip3
+    - CIBW_BUILD=cp3?-*
+    - CIBW_SKIP=cp34-*
+
 
 script:
   - $PIP install cibuildwheel==0.10.0
