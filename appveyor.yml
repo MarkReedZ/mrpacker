@@ -1,5 +1,6 @@
 environment:
   CIBW_BUILD: cp3?-*
+  CIBW_SKIP: cp34-*
 
 build_script:
   - pip install cibuildwheel==0.10.0
