@@ -126,6 +126,12 @@ int encode( PyObject *o, Encoder *e ) {
     char *s = e->s;
     int overflow;
     long i = PyInt_AS_LONG(o);
+
+    // TODO 
+      //*(e->s++) = 0x64;
+      //long long *p = (long long *)(e->s);
+      //*p = i;
+      //e->s += 8;
   }
 #endif
   else if (PyUnicode_Check(o)) {

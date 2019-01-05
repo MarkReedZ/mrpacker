@@ -9,10 +9,7 @@ matrix:
     - sudo: required
       services:
         - docker
-      env: PIP=pip
-    - os: osx
-      language: generic
-      env: PIP=pip2
+      env: PIP=pip3
 
 env:
   global:

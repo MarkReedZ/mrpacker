@@ -6,14 +6,34 @@ def pbuf( b ):
     s += hex(c) + ", "
   print(s)
 
-import mrpacker
-o = {}
-for x in range(35):
-  o[x] = 1
+import mrpacker, mrjson, time
+
+f = open("../mrjson/bench/json/twitter.json","r")
+s = f.read()
+f.close()
+o = mrjson.loads(s)
+
+#print(o)
+
+#o = [True]*5000
+o = {"name":"MalthusianProphet","tl":2004,"dankmemes":True,"list":[1,2,3,4,5,6]}
+
+st = time.time()
 b = mrpacker.pack( o )
-print(b)
-pbuf(b)
-print( mrpacker.unpack(b) )
+print( "took ", time.time()-st)
+st = time.time()
+o = mrpacker.unpack( b )
+print( "took ", time.time()-st)
+#exit(1)
+
+print("mrjson:")
+st = time.time()
+b = mrjson.dumps( o )
+print( "took ", time.time()-st)
+st = time.time()
+o = mrjson.loads( b )
+print( "took ", time.time()-st)
+#print(b)
 
 #print(b)
 #f = open("test.mrp","wb")
