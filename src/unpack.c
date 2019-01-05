@@ -26,6 +26,7 @@ inline uint64_t rdtsc()
 }
 
 #elif defined(_M_X64)
+#include <intrin.h>
 
 extern "C" unsigned __int64 __rdtsc();
 #pragma intrinsic(__rdtsc)
