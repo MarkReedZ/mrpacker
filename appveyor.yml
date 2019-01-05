@@ -1,0 +1,10 @@
+environment:
+  CIBW_BUILD: cp3?-*
+
+build_script:
+  - pip install cibuildwheel==0.10.0
+  - cibuildwheel --output-dir wheelhouse
+
+artifacts:
+  - path: "wheelhouse\\*.whl"
+    name: Wheels
