@@ -1,12 +1,6 @@
-deploy:
-  - provider: Environment
-    name: production
-    on:
-      APPVEYOR_REPO_TAG: true
-
 environment:
   CIBW_BUILD: cp3?-*
-  CIBW_SKIP: cp34-*
+  TWINE_USERNAME: MarkReedZ
 
 build_script:
   - pip install cibuildwheel==0.10.0
@@ -18,7 +12,6 @@ build_script:
     &&
     python -m twine upload wheelhouse/*.whl
     )
-
 
 artifacts:
   - path: "wheelhouse\\*.whl"
