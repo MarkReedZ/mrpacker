@@ -13,7 +13,7 @@ with codecs.open('version.txt', encoding='utf-8') as f:
     VERSION = f.read().strip()
 
 link_args = ['-lstdc++', '-lm']
-compile_args = ['-D_GNU_SOURCE','-O3']
+compile_args = ['-D_GNU_SOURCE','-O3','-std=c99']
 if platform.system() == 'Windows':
   compile_args = ['-D_GNU_SOURCE']
   link_args = []
