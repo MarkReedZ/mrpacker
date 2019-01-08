@@ -28,7 +28,6 @@ inline uint64_t rdtsc()
 #elif defined(_M_X64)
 #include <intrin.h>
 
-//extern unsigned __int64 __rdtsc();
 #pragma intrinsic(__rdtsc)
 inline uint64_t rdtsc()
 {
@@ -177,7 +176,6 @@ PyObject *decode( char *s, char *end) {
     uint32_t *p = (uint32_t*)s;
     uint32_t l = *p;
     s+=4;
-    //printf("new dict of len %d\n", l);
     if ( l > 0 ) {
       depth += 1;
       if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);

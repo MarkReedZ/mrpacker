@@ -8,13 +8,6 @@ typedef struct _encoder
   int depth;  
 } Encoder;
 
-//static void print_buffer( char* b, int len ) {
-  //for ( int z = 0; z < len; z++ ) {
-    //printf( "%02x ",(int)b[z]);
-  //}
-  //printf("\n");
-//}
-
 static int SetError(const char *message)
 {
   PyErr_Format (PyExc_ValueError, "%s", message);

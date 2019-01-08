@@ -43,7 +43,7 @@ setup(
     ext_modules = [module1],
     author="Mark Reed",
     author_email="MarkReedZ@mail.com",
-    download_url="https://github.com/MarkReedZ/mrpacker/archive/v1.0.0.tar.gz",
+    download_url="https://github.com/MarkReedZ/mrpacker/archive/v1.2.tar.gz",
     platforms=['any'],
     url="https://github.com/MarkReedZ/mrpacker",
     classifiers=[
@@ -51,9 +51,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: C',
-        'Programming Language :: C++',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python',
     ],
