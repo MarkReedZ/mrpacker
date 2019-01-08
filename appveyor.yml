@@ -1,3 +1,9 @@
+deploy:
+  - provider: Environment
+    name: production
+    on:
+      APPVEYOR_REPO_TAG: true
+
 environment:
   CIBW_BUILD: cp3?-*
   CIBW_SKIP: cp34-*
