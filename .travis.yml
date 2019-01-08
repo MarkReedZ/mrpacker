@@ -1,6 +1,9 @@
 notifications:
   email: false
 
+# Only build tags
+if: tag IS present
+
 env:
   global:
     - TWINE_USERNAME=MarkReedZ
