@@ -28,6 +28,6 @@ script:
   - ls wheelhouse/
   - |
     if [[ $TRAVIS_TAG ]]; then
-      python -m pip install twine
-      python -m twine upload wheelhouse/*.whl
+      /opt/python/cp37-cp37m/bin/python -m pip install twine
+      /opt/python/cp37-cp37m/bin/python -m twine upload wheelhouse/*.whl
     fi
