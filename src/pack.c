@@ -59,6 +59,7 @@ static inline void reverse(char* begin, char* end)
 // 0x68 32 bit unsigned long
 // 0x69 dict 32 bit length
 // 0x6A list 32 bit length
+// 0x6B byte string 32 bit length
 
 
 int encode( PyObject *o, Encoder *e ) {
@@ -77,7 +78,8 @@ int encode( PyObject *o, Encoder *e ) {
   else if ( PyLong_Check(o) ) {
     int overflow;
     long long i = PyLong_AsLongLongAndOverflow(o, &overflow);
-    //if (i == -1 && PyErr_Occurred()) return 0;
+    if (PyErr_Occurred()) return 0;
+    if (i == -1 && overflow == -1) { PyErr_SetString(PyExc_OverflowError, "int is less than the max negative number"); return 0; }
     if (overflow == 0) {
 
       if ( i >= 0 ) {
@@ -108,10 +110,10 @@ int encode( PyObject *o, Encoder *e ) {
     } else {
       *(e->s++) = 0x65;
       unsigned long long ui = PyLong_AsUnsignedLongLong(o);
+      if (PyErr_Occurred()) return 0;
       unsigned long long *p = (unsigned long long *)(e->s);
       *p = ui;
       e->s += 8;
-      //if (PyErr_Occurred()) return 0;
     }
   }
 #if PY_MAJOR_VERSION < 3
@@ -120,11 +122,11 @@ int encode( PyObject *o, Encoder *e ) {
     int overflow;
     long i = PyInt_AS_LONG(o);
 
-    // TODO 
-      //*(e->s++) = 0x64;
-      //long long *p = (long long *)(e->s);
-      //*p = i;
-      //e->s += 8;
+    *(e->s++) = 0x64;
+    long long *p = (long long *)(e->s);
+    *p = i;
+    e->s += 8;
+
   }
 #endif
   else if (PyUnicode_Check(o)) {
@@ -244,6 +246,41 @@ int encode( PyObject *o, Encoder *e ) {
       encode(item, e);
     }
   }
+#if PY_MAJOR_VERSION >= 3
+  else if (PyBytes_Check(o)) {
+    Py_ssize_t l;
+    char *s;
+    int rc = PyBytes_AsStringAndSize(o, &s, &l);
+
+    if (s == NULL) return 0; //ERR
+
+    resizeBufferIfNeeded(e,l); // TODO error if buf not allocated
+    *(e->s++) = 0x6B;
+    uint32_t *p32 = (uint32_t*)(e->s);
+    *p32 = l;
+    e->s += 4;
+
+    memcpy(e->s, s, l);
+    e->s += l;
+
+  }
+#else
+  else if (PyByteArray_Check(o)) {
+    const char* s = PyByteArray_AS_STRING(o);
+    Py_ssize_t l = PyByteArray_GET_SIZE(o);
+
+    if (s == NULL) return 0; //ERR
+
+    resizeBufferIfNeeded(e,l); // TODO error if buf not allocated
+    *(e->s++) = 0x6B;
+    uint32_t *p32 = (uint32_t*)(e->s);
+    *p32 = l;
+    e->s += 4;
+
+    memcpy(e->s, s, l);
+    e->s += l;
+  }
+#endif
   else if ( PyFloat_Check(o) ) {
     union { double d; uint64_t i; } mem;
     mem.d = PyFloat_AsDouble(o);

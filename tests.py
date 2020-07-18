@@ -7,14 +7,14 @@ import inspect
 def raises( o, f, exc,details ):
   try:
     f(o)
-    if len(o) > 100: o = o[:100]
-    print("ERROR ", o, " didn't raise exception")
+    cf = inspect.currentframe()
+    print("ERROR line",cf.f_back.f_lineno,"didn't raise exception",str(exc))
   except Exception as e:
-    if len(o) > 100: o = o[:100]
+    cf = inspect.currentframe()
     if type(e) != exc:
-      print("ERROR",o," rose wrong exception",type(e),e)
+      print("ERROR line",cf.f_back.f_lineno,"rose the wrong exception",str(e))
     if str(e) != details:
-      print("ERROR",o," rose wrong exception details actual vs expected:\n",e,"\n",details)
+      print("ERROR line",cf.f_back.f_lineno,"raised an exception with the wrong details\nAct: ",str(e),"\nExp: ",details)
 
 def eq( a, b ):
   if a != b:
@@ -25,14 +25,14 @@ def eq( a, b ):
 
 
 
-
+# Pack and unpack a bunch of objects
 
 print("Running tests...")
 
 objs = [
 [float("inf"),2],
 [1,float("-inf"),2],
--1, 12, 1,
+-1, 0, 1,255,256,
 -132123123123,
 1.002, -1.31,
 -312312312312.31,
@@ -61,7 +61,7 @@ None, True,False,float('inf'),
 { "A":[{},[],{}], "b": { "1":1,"2":2,"3":3 } },
 ]
 o = {}
-for x in range(1000):
+for x in range(100000):
   o[x] = x
 objs.append(o)
 
@@ -86,9 +86,17 @@ for (dirpath, dirnames, filenames) in walk("test_data"):
     except Exception as e:
       print( "ERROR",str(e), o )
 
-# TODO
-#print("Testing Exceptions..")
-#raises( "NaNd",         j.loads, ValueError, "Expecting 'NaN' at pos 0" )
+
+
+print("Testing Exceptions..")
+raises( 99999999999999999999999999999999, j.pack, OverflowError, "int too big to convert" )
+raises( -99999999999999999999999999999999, j.pack, OverflowError, "int is less than the max negative number" )
 
 
 print("Done")
+
+
+
+
+
+

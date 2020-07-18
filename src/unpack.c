@@ -57,6 +57,19 @@ static PyObject* SetErrorInt(const char *message, int pos)
   return NULL;
 }
 
+// First 3 bits:  000 not used, 001 map, 010 array, 011 various, 100 string, 110 tiny int
+// 0x60 null
+// 0x61 true
+// 0x62 false
+// 0x63 double
+// 0x64 64 bit long
+// 0x65 64 bit unsigned long
+// 0x66 string 32 bit length
+// 0x67 32 bit long
+// 0x68 32 bit unsigned long
+// 0x69 dict 32 bit length
+// 0x6A list 32 bit length
+
 
 PyObject *decode( char *s, char *end) {
   PyObject *parents[MAX_DEPTH];

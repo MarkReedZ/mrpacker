@@ -6,7 +6,13 @@ def pbuf( b ):
     s += hex(c) + ", "
   print(s)
 
-import mrpacker, mrjson, time
+import mrpacker as mrp
+import time
+#import ujson, mrjson
+
+o = 23
+print( o == mrp.unpack(mrp.pack(o)) )
+exit()
 
 f = open("../mrjson/bench/json/twitter.json","r")
 s = f.read()
@@ -17,14 +23,16 @@ o = mrjson.loads(s)
 
 #o = [True]*5000
 o = {"name":"MalthusianProphet","tl":2004,"dankmemes":True,"list":[1,2,3,4,5,6]}
+#o = {"name":55,"tl":2004,"dankmemes":True,"list":[1,2,3,4,5,6]}
+o = [ "fadsfds", 213 , 123, 1, 2, 3, "lists are cool", [1,2,3,] ]
 
 st = time.time()
-b = mrpacker.pack( o )
+b = mrp.pack( o )
 print( "took ", time.time()-st)
 st = time.time()
-o = mrpacker.unpack( b )
+o = mrp.unpack( b )
 print( "took ", time.time()-st)
-#exit(1)
+exit(1)
 
 print("mrjson:")
 st = time.time()
@@ -34,6 +42,15 @@ st = time.time()
 o = mrjson.loads( b )
 print( "took ", time.time()-st)
 #print(b)
+print("ujson:")
+st = time.time()
+b = ujson.dumps( o )
+print( "took ", time.time()-st)
+st = time.time()
+o = ujson.loads( b )
+print( "took ", time.time()-st)
+#print(b)
+
 
 #print(b)
 #f = open("test.mrp","wb")
