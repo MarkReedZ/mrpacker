@@ -62,6 +62,8 @@ static inline void reverse(char* begin, char* end)
 // 0x6B byte string 32 bit length
 
 
+// Recursively dive into the Python object encoding each part
+
 int encode( PyObject *o, Encoder *e ) {
   resizeBufferIfNeeded(e,2048);
 
