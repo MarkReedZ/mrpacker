@@ -15,10 +15,11 @@ May be used as a replacement for json
 ```python
   import mrpacker
   o = { "name":"mrpacker", "awesome?":"yes" }
-  b = msgpack.packb( o )
+  b = mrpacker.pack( o )
   print( mrpacker.unpack(b) )
 ```
 
 ## Benchmarks
 
 See b.py and benchmark your own real world cases as performance may vary
+
