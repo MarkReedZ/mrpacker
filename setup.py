@@ -43,7 +43,7 @@ setup(
     ext_modules = [module1],
     author="Mark Reed",
     author_email="MarkReedZ@mail.com",
-    download_url="https://github.com/MarkReedZ/mrpacker/archive/v1.2.tar.gz",
+    download_url="https://github.com/MarkReedZ/mrpacker/archive/v1.4.tar.gz",
     platforms=['any'],
     url="https://github.com/MarkReedZ/mrpacker",
     classifiers=[
