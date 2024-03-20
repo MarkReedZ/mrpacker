@@ -78,45 +78,38 @@ int encode( PyObject *o, Encoder *e ) {
     *(e->s++) = 0x62;
   }
   else if ( PyLong_Check(o) ) {
-    int overflow;
-    long long i = PyLong_AsLongLongAndOverflow(o, &overflow);
-    if (PyErr_Occurred()) return 0;
-    if (i == -1 && overflow == -1) { PyErr_SetString(PyExc_OverflowError, "int is less than the max negative number"); return 0; }
-    if (overflow == 0) {
-
-      if ( i >= 0 ) {
-        if ( i < 32 ) {
-          *(e->s++) = 0xC0 | (unsigned char)i;
-          return 1;
-        } else if ( i < 0xFFFFFFFF ) {
-          *(e->s++) = 0x68;
-          uint32_t *p = (uint32_t*)(e->s);
-          *p = (uint32_t)i;
-          e->s += 4;
-          return 1;
-        } 
-      }
-      else if ( i < 0 && i > -0xFFFFFFFFLL ) {
+    unsigned long long ui = PyLong_AsUnsignedLongLong(o);
+    if (PyErr_Occurred()) { // Negative
+      long long i = PyLong_AsLongLong(o);
+      if ( i > -0xFFFFFFFFLL ) {
         *(e->s++) = 0x67;
         int *p = (int*)(e->s);
         *p = (int)i;
         e->s += 4;
-        return 1;
-      } 
- 
-      *(e->s++) = 0x64;
-      long long *p = (long long *)(e->s);
-      *p = i;
-      e->s += 8;
+      } else {
+        *(e->s++) = 0x64;
+        long long *p = (long long *)(e->s);
+        *p = i;
+        e->s += 8;
+      }
+      return 1;
+    }
 
-    } else {
+    if ( ui < 32 ) {
+      *(e->s++) = 0xC0 | (unsigned char)ui;
+      return 1;
+    } else if ( ui < 0xFFFFFFFF ) {
+      *(e->s++) = 0x68;
+      uint32_t *p = (uint32_t*)(e->s);
+      *p = (uint32_t)ui;
+      e->s += 4;
+    }  else {
       *(e->s++) = 0x65;
-      unsigned long long ui = PyLong_AsUnsignedLongLong(o);
-      if (PyErr_Occurred()) return 0;
       unsigned long long *p = (unsigned long long *)(e->s);
       *p = ui;
       e->s += 8;
     }
+    return 1;
   }
 #if PY_MAJOR_VERSION < 3
   else if ( PyInt_Check(o) ) {

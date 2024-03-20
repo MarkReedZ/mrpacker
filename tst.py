@@ -7,10 +7,18 @@ def pbuf( b ):
     s += hex(c) + ", "
   print(s)
 
-import mrpacker as mrp
+import mrpacker
 import time
 import ujson, mrjson
 
+
+n = 0x100000000000
+n = 99999999999999999999999
+b = mrpacker.pack(n)
+for c in b:
+  print(hex(c))
+print(mrpacker.unpack(b))
+exit()
 
 #f = open("../mrjson/bench/json/twitter.json","r")
 #s = f.read()
@@ -25,7 +33,7 @@ o = {"name":"MalthusianProphet","tl":2004,"dankmemes":True,"list":[1,2,3,4,5,6]}
 #o = [ "fadsfds", 213 , 123, 1, 2, 3, "lists are cool", [1,2,3,] ]
 
 for x in range(1):
-  if 1:
+  if 0:
     #st = time.time()
     b = mrp.pack( o )
     #print( "took ", time.time()-st)

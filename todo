@@ -1,4 +1,5 @@
 
-While encoding if the string is ascii using a different code point would allow the javascript unpacker to just copy the mem
-Negative numbers review
-packs is 2x slower than mrjson though unpack is 2x faster
+Convert to string if the number is too big?
+n = 99999999999999999999999
+b = mrpacker.pack(n)
+
