@@ -143,7 +143,7 @@ PyObject *decode( char *s, char *end) {
     if ( l == 0 ) o = PyList_New(0);
     else {
       depth += 1;
-      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);
+      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects 0x40, the max depth is ", MAX_DEPTH);
       DBG printf("depth %d is list\n",depth);
       parents[depth] = PyList_New(l);
       curlen[depth] = 0;
@@ -156,9 +156,10 @@ PyObject *decode( char *s, char *end) {
     s++;
     uint32_t *p = (uint32_t*)s;
     uint32_t l = *p;
+    //printf("6A list of len %d\n", l);
     s+=4;
     depth += 1;
-    if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);
+    if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects 0x6A, the max depth is ", MAX_DEPTH);
     DBG printf("depth %d is list\n",depth);
     parents[depth] = PyList_New(l);
     curlen[depth] = 0;
@@ -172,7 +173,7 @@ PyObject *decode( char *s, char *end) {
     s += 1;
     if ( l > 0 ) {
       depth += 1;
-      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);
+      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects 0x20, the max depth is ", MAX_DEPTH);
       DBG printf("depth %d is dict\n",depth);
       parents[depth] = PyDict_New();
       curlen[depth] = 0;
@@ -191,7 +192,7 @@ PyObject *decode( char *s, char *end) {
     s+=4;
     if ( l > 0 ) {
       depth += 1;
-      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects, the max depth is ", MAX_DEPTH);
+      if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects 0x69, the max depth is ", MAX_DEPTH);
       DBG printf("depth %d is dict\n",depth);
       parents[depth] = PyDict_New();
       curlen[depth] = 0;

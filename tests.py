@@ -89,8 +89,8 @@ for (dirpath, dirnames, filenames) in walk("test_data"):
 
 
 print("Testing Exceptions..")
-raises( 99999999999999999999999999999999, j.pack, OverflowError, "int too big to convert" )
-raises( -99999999999999999999999999999999, j.pack, OverflowError, "int is less than the max negative number" )
+raises( 99999999999999999999999999999999, j.pack, OverflowError, "The number is out of range for a long long" )
+raises( -99999999999999999999999999999999, j.pack, OverflowError, "The number is out of range for a long long" )
 
 
 print("Done")

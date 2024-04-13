@@ -79,8 +79,13 @@ int encode( PyObject *o, Encoder *e ) {
   }
   else if ( PyLong_Check(o) ) {
     unsigned long long ui = PyLong_AsUnsignedLongLong(o);
-    if (PyErr_Occurred()) { // Negative
+    if (PyErr_Occurred()) { // Negative or too big
+      PyErr_Clear();
       long long i = PyLong_AsLongLong(o);
+      if (PyErr_Occurred()) { // Too big either below -max or > +max
+        PyErr_Clear(); PyErr_SetString(PyExc_OverflowError, "The number is out of range for a long long"); 
+        return 0;
+      }
       if ( i > -0xFFFFFFFFLL ) {
         *(e->s++) = 0x67;
         int *p = (int*)(e->s);
