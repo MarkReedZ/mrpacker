@@ -81,7 +81,6 @@ PyObject *decode( char *s, char *end) {
   int depth = -1;
   PyObject *o;
 
-
   while( s < end ) {
   if ( *s == 0x60 ) { s += 1; Py_INCREF(Py_None); o = Py_None; }
   else if ( (*(s) & 0xE0) == 0x80 ) {  // String
@@ -96,6 +95,14 @@ PyObject *decode( char *s, char *end) {
     uint32_t l = *p;
     s+=4;
     o = PyUnicode_FromStringAndSize( s, l );
+    s += l;
+  }
+  else if ( *(s) == 0x6B ) {
+    s++;
+    uint32_t *p = (uint32_t*)s;
+    uint32_t l = *p;
+    s+=4;
+    o = PyBytes_FromStringAndSize( s, l );
     s += l;
   }
   else if ( *(s) == 0x61 ) { s += 1; Py_INCREF(Py_True);  o = Py_True; }
