@@ -1,6 +1,10 @@
 name: Build and upload to PyPI
 
-on: push
+on: 
+    workflow_dispatch:
+    push:
+        branches:
+        - main
 
 jobs:
   build_wheels:
@@ -18,7 +22,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.cibw_archs }}
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   build_sdist:
@@ -32,6 +36,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          name: cibw-sdist
           path: dist/*.tar.gz
 
   upload_pypi:
@@ -42,11 +47,11 @@ jobs:
       url: https://pypi.org/p/mrpacker 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
-    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
+    if: startsWith(github.ref, 'refs/tags/v')  # only publish to PyPI on tag pushes
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: artifact
+          pattern: cibw-*
           path: dist
           merge-multiple: true
 
