@@ -1,4 +1,5 @@
 
+
 #include "unpack.h"
 #include "py_defines.h"
 #include <time.h>
@@ -82,9 +83,11 @@ PyObject *decode( char *s, char *end) {
   PyObject *o;
 
   while( s < end ) {
+    DBG printf(" codepoint %02x\n",*s);
   if ( *s == 0x60 ) { s += 1; Py_INCREF(Py_None); o = Py_None; }
   else if ( (*(s) & 0xE0) == 0x80 ) {  // String
     int l = *(s) & 0x1F; 
+    DBG printf(" string len %d\n",l);
     s += 1;
     o = PyUnicode_FromStringAndSize( s, l );
     s += l;
@@ -93,6 +96,7 @@ PyObject *decode( char *s, char *end) {
     s++;
     uint32_t *p = (uint32_t*)s;
     uint32_t l = *p;
+    DBG printf(" long string len %d\n",l);
     s+=4;
     o = PyUnicode_FromStringAndSize( s, l );
     s += l;
@@ -176,12 +180,11 @@ PyObject *decode( char *s, char *end) {
   }
   else if ( (*(s) & 0xE0) == 0x20 ) {  // dict
     int l = *(s) & 0x1F; 
-    //printf("new dict of len %d\n", l);
     s += 1;
     if ( l > 0 ) {
       depth += 1;
       if (depth == MAX_DEPTH) return SetErrorInt("Too many nested objects 0x20, the max depth is ", MAX_DEPTH);
-      DBG printf("depth %d is dict\n",depth);
+      DBG printf("depth %d is dict len %d\n",depth, l);
       parents[depth] = PyDict_New();
       curlen[depth] = 0;
       maxlen[depth] = l;

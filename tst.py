@@ -11,9 +11,11 @@ import mrpacker
 import time
 import ujson, mrjson
 
+o = "阿斯诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼"
+print ( mrpacker.unpack(mrpacker.pack(o)) )
 
 n = 0x100000000000
-n = 99999999999999999999999
+n = 999999999999999999
 b = mrpacker.pack(n)
 for c in b:
   print(hex(c))
