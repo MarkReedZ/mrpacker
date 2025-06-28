@@ -1,4 +1,6 @@
 
+o = {'tl': [3376686588804032, 3467362509744518, 3467383293555110, 3467470637563061, 3467478106854362, 3467478107397231, 3467500195766276, 3535631493306510], 'd': {3376686588804032: {'p': 0, 'txt': 'test', 'c': 3376686588804032, 'cs': [3376907122926878, 3467281916293896], 'status': 'Mark', 'rtg': 1, 'ts': 1537224158, 'num': 3, 'tp': 3376686588804032}, 3376907122926878: {'p': 3376686588804032, 'txt': 'Well now\\n', 'c': 3376907122926878, 'cs': [3467275147554700], 'status': 'Mark', 'rtg': 1, 'ts': 1537224368, 'tp': 3376686588804032}, 3467275147554700: {'p': 3376907122926878, 'txt': '<p>new comment</p>\\n', 'c': 3467275147554700, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537310550, 'tp': 3376686588804032}, 3467281916293896: {'p': 3376686588804032, 'txt': '<p>another comment</p>\\n', 'c': 3467281916293896, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537310556, 'tp': 3376686588804032}, 3467362509744518: {'p': 0, 'txt': '<p>ttest</p>\\n', 'c': 3467362509744518, 'cs': [3467383293367650], 'status': 'Mark', 'rtg': 1, 'ts': 1537310633, 'num': 1, 'tp': 3467362509744518}, 3467383293555110: {'p': 0, 'txt': '<p>ttesttestst</p>\\n', 'c': 3467383293555110, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537310653, 'num': 0, 'tp': 3467383293555110}, 3467383293367650: {'p': 3467362509744518, 'txt': '<p>tadfas</p>\\n', 'c': 3467383293367650, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537310653, 'tp': 3467362509744518}, 3467470637563061: {'p': 0, 'txt': '<p>zz</p>\\n', 'c': 3467470637563061, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537310736, 'num': 0, 'tp': 3467470637563061}, 3467478106854362: {'p': 0, 'txt': '<p>zzfdsfdsa</p>\\n', 'c': 3467478106854362, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537310743, 'num': 0, 'tp': 3467478106854362}, 3467478107397231: {'p': 0, 'txt': '<p>2</p>\\n', 'c': 3467478107397231, 'cs': [3467500195452975], 'status': 'Mark', 'rtg': 1, 'ts': 1537310743, 'num': 1, 'tp': 3467478107397231}, 3467500195766276: {'p': 0, 'txt': '<p>3</p>\\n', 'c': 3467500195766276, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537310764, 'num': 0, 'tp': 3467500195766276}, 3467500195452975: {'p': 3467478107397231, 'txt': '<p>tat</p>\\n', 'c': 3467500195452975, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537310764, 'tp': 3467478107397231}, 3535631493306510: {'p': 0, 'txt': '<p>New comment</p>\\n', 'c': 3535631493306510, 'cs': [], 'status': 'Mark', 'rtg': 1, 'ts': 1537375739, 'num': 0, 'tp': 3535631493306510}}}
+
 
 # To create a binary string in lua for using wrk to test mrpacker and mrhttp
 def pbuf( b ):
@@ -9,57 +11,17 @@ def pbuf( b ):
 
 import mrpacker
 import time
-import ujson, mrjson
 
-o = "阿斯诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼"
-print ( mrpacker.unpack(mrpacker.pack(o)) )
+if 0:
+  o = "阿斯诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼诉讼"
+  print ( mrpacker.unpack(mrpacker.pack(o)) )
 
-n = 0x100000000000
-n = 999999999999999999
-b = mrpacker.pack(n)
-for c in b:
-  print(hex(c))
-print(mrpacker.unpack(b))
-exit()
 
-#f = open("../mrjson/bench/json/twitter.json","r")
-#s = f.read()
-#f.close()
-#o = mrjson.loads(s)
-
-#print(o)
-
-#o = [True]*5000
-o = {"name":"MalthusianProphet","tl":2004,"dankmemes":True,"list":[1,2,3,4,5,6]}
-#o = {"name":55,"tl":2004,"dankmemes":True,"list":[1,2,3,4,5,6]}
-#o = [ "fadsfds", 213 , 123, 1, 2, 3, "lists are cool", [1,2,3,] ]
-
-for x in range(1):
-  if 0:
-    #st = time.time()
-    b = mrp.pack( o )
-    #print( "took ", time.time()-st)
-    #st = time.time()
-    #o = mrp.unpack( b )
-    #print( "took ", time.time()-st)
-    #exit(1)
-  
-  if 0:
-    #st = time.time()
-    b = mrjson.dumps( o )
-    #print( "took ", time.time()-st)
-    #st = time.time()
-    #o = mrjson.loads( b )
-    #print( "took ", time.time()-st)
-  
-  if 0:
-    #print(b)
-    print("ujson:")
-    st = time.time()
-    b = ujson.dumps( o )
-    print( "took ", time.time()-st)
-    st = time.time()
-    o = ujson.loads( b )
-    print( "took ", time.time()-st)
-    #print(b)
+st = time.time()
+b = mrpacker.pack( o )
+print( "size ", len(b) )
+print( "took ", time.time()-st)
+st = time.time()
+o = mrpacker.unpack( b )
+print( "took ", time.time()-st)
   

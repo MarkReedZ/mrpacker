@@ -1,5 +1,6 @@
 
 #include "py_defines.h"
+#include "unpack.h"
 
 #define STRINGIFY(x) XSTRINGIFY(x)
 #define XSTRINGIFY(x) #x
@@ -21,6 +22,10 @@ static PyMethodDef mrpackerMethods[] = {
 
 #if PY_MAJOR_VERSION >= 3
 
+static void module_free(void *m) {
+  cleanup_string_interning();
+}
+
 static struct PyModuleDef moduledef = {
   PyModuleDef_HEAD_INIT,
   "mrpacker",
@@ -30,7 +35,7 @@ static struct PyModuleDef moduledef = {
   NULL,           /* m_reload */
   NULL,           /* m_traverse */
   NULL,           /* m_clear */
-  NULL            /* m_free */
+  module_free     /* m_free */
 };
 
 #define PYMODINITFUNC       PyObject *PyInit_mrpacker(void)
@@ -52,6 +57,9 @@ PYMODINITFUNC
   m = PYMODULE_CREATE();
 
   if (m == NULL) { MODINITERROR; }
+
+  // Initialize string interning
+  init_string_interning();
 
   PyModule_AddStringConstant(m, "__version__", STRINGIFY(MRPACKER_VERSION));
   PyModule_AddStringConstant(m, "__author__", "Mark Reed <mark@untilfluent.com>");

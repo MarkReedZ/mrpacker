@@ -1,5 +1,6 @@
 
 #include "py_defines.h"
+#include "common_strings.h"
 #include <stdio.h>
 
 typedef struct _encoder
@@ -60,12 +61,20 @@ static inline void reverse(char* begin, char* end)
 // 0x69 dict 32 bit length
 // 0x6A list 32 bit length
 // 0x6B byte string 32 bit length
+// 0x6C common string index (1 byte)
 
 
 // Recursively dive into the Python object encoding each part
 
 int encode( PyObject *o, Encoder *e ) {
   resizeBufferIfNeeded(e,2048);
+  
+  // Initialize common strings lookup on first call
+  static int common_strings_initialized = 0;
+  if (!common_strings_initialized) {
+    init_common_strings_lookup();
+    common_strings_initialized = 1;
+  }
 
   // TODO Would reordering speed this up?
   if ( o == Py_None ) {
@@ -140,6 +149,16 @@ int encode( PyObject *o, Encoder *e ) {
 
     if (s == NULL) return 0; //ERR
 
+    // Check if this is a common string first
+    int common_index = find_common_string_index(s, l);
+    if (common_index >= 0 && common_index < 256) {
+      // Encode as common string index (much more efficient!)
+      *(e->s++) = 0x6C;
+      *(e->s++) = (unsigned char)common_index;
+      return 1;
+    }
+
+    // Not a common string, encode normally
     if ( l < 32 ) {
       *(e->s++) = 0x80 | l;
     } else {
@@ -167,6 +186,16 @@ int encode( PyObject *o, Encoder *e ) {
     l = PyString_GET_SIZE(o);
     if (s == NULL) return 0; //ERR
 
+    // Check if this is a common string first
+    int common_index = find_common_string_index(s, l);
+    if (common_index >= 0 && common_index < 256) {
+      // Encode as common string index (much more efficient!)
+      *(e->s++) = 0x6C;
+      *(e->s++) = (unsigned char)common_index;
+      return 1;
+    }
+
+    // Not a common string, encode normally
     if ( l < 32 ) {
       *(e->s++) = 0x80 | l;
     } else {
@@ -317,7 +346,6 @@ int do_encode(PyObject *o, Encoder *enc ) {
 
 PyObject* pack(PyObject* self, PyObject *args, PyObject *kwargs) {
   static char *kwlist[] = { "obj", NULL };
-
   PyObject *o = NULL;
 
   Encoder enc = { NULL,NULL,NULL,0 };
