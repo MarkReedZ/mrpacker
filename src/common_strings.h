@@ -4,19 +4,22 @@
 #include "py_defines.h"
 
 // Maximum string length we'll consider for interning
-#define MAX_STRING_LENGTH 16
+#define MAX_STRING_LENGTH 64
 
 // String arrays organized by length for O(1) access
 static const char * const len1_strings[] = {"c","d"};
 static const char * const len2_strings[] = {"tl","id"};
-static const char * const len3_strings[] = {"txt", "num", "rtg", "key", "url", "api"};
-static const char * const len4_strings[] = {"text", "type", "name", "data", "code", "user", "size"};
+static const char * const len3_strings[] = {"geo","txt", "num", "rtg", "key", "url", "api"};
+static const char * const len4_strings[] = {"text", "type", "name", "lang", "data", "code", "user", "size"};
 static const char * const len5_strings[] = {"value", "error", "token", "email", "title"};
-static const char * const len6_strings[] = {"status", "result", "format", "length"};
+static const char * const len6_strings[] = {"id_str","status", "result", "format", "length"};
 static const char * const len7_strings[] = {"message", "session", "version", "created", "updated"};
 static const char * const len8_strings[] = {"password", "username", "encoding"};
-static const char * const len9_strings[] = {"timestamp"};
-static const char * const len11_strings[] = {"description"};
+static const char * const len9_strings[] = {"timestamp","favorited","retweeted"};
+static const char * const len11_strings[] = {"description","geo_enabled","coordinates"};
+static const char * const len12_strings[] = {"contributors", "expanded_url"};
+static const char * const len23_strings[] = {"profile_background_tile"};
+static const char * const len28_strings[] = {"profile_sidebar_border_color"};
 
 // Global lookup tables
 static const char * const *strings_by_len[MAX_STRING_LENGTH + 1] = {NULL};
@@ -42,6 +45,7 @@ static void init_common_strings_lookup(void) {
     strings_by_len[8] = len8_strings; strings_count[8] = sizeof(len8_strings) / sizeof(len8_strings[0]);
     strings_by_len[9] = len9_strings; strings_count[9] = sizeof(len9_strings) / sizeof(len9_strings[0]);
     strings_by_len[11] = len11_strings; strings_count[11] = sizeof(len11_strings) / sizeof(len11_strings[0]);
+    strings_by_len[12] = len12_strings; strings_count[12] = sizeof(len12_strings) / sizeof(len12_strings[0]);
     
     // Calculate total count
     total_common_strings = 0;

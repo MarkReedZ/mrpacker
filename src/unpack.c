@@ -196,11 +196,13 @@ PyObject *decode( char *s, char *end) {
     s++;
     unsigned char index = *(s);
     s++;
-    o = get_common_string_by_index(index);
-    if (o == NULL) {
-      PyErr_Format(PyExc_ValueError, "Invalid common string index: %d", index);
-      return NULL;
-    }
+    Py_INCREF(interned_pyobjects_by_index[index]);
+    o = interned_pyobjects_by_index[index];
+    //o = get_common_string_by_index(index);
+    //if (o == NULL) {
+      //PyErr_Format(PyExc_ValueError, "Invalid common string index: %d", index);
+      //return NULL;
+    //}
   }
   else if ( *(s) == 0x61 ) { s += 1; Py_INCREF(Py_True);  o = Py_True; }
   else if ( *(s) == 0x62 ) { s += 1; Py_INCREF(Py_False); o = Py_False; }

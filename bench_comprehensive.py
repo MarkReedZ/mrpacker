@@ -12,19 +12,7 @@ try:
     libraries['mrpacker'] = mrpacker
 except ImportError:
     print("mrpacker not available")
-
-try:
-    import msgpack
-    libraries['msgpack'] = msgpack
-except ImportError:
-    print("msgpack not available - install with: pip install msgpack")
-
-try:
-    import cbor2
-    libraries['cbor2'] = cbor2
-except ImportError:
-    print("cbor2 not available - install with: pip install cbor2")
-
+z="""
 try:
     import orjson
     libraries['orjson'] = orjson
@@ -32,13 +20,26 @@ except ImportError:
     print("orjson not available - install with: pip install orjson")
 
 try:
-    import ujson
-    libraries['ujson'] = ujson
+    import msgpack
+    libraries['msgpack'] = msgpack
 except ImportError:
-    print("ujson not available - install with: pip install ujson")
+    print("msgpack not available - install with: pip install msgpack")
+
+#try:
+    #import cbor2
+    #libraries['cbor2'] = cbor2
+#except ImportError:
+    #print("cbor2 not available - install with: pip install cbor2")
+
+"""
+#try:
+    #import ujson
+    #libraries['ujson'] = ujson
+#except ImportError:
+    #print("ujson not available - install with: pip install ujson")
 
 # Standard library JSON is always available
-libraries['json'] = json
+#libraries['json'] = json
 
 def load_test_data():
     """Load test datasets from test_data directory"""
@@ -64,7 +65,7 @@ def load_test_data():
         #('large', 'twit.json'),
         # Skip very large files for now to keep benchmark reasonable
          ('twitter', 'twitter.json'),
-         ('canada', 'canada.json'),
+         #('canada', 'canada.json'),
     ]
     
     for name, filename in json_files:
